@@ -6,7 +6,7 @@
 This repository contains the code for the paper "Knowledge Distillation Circumvents Nonlinearity for Optical Convolutional Neural Networks", which is available [here](https://arxiv.org/pdf/2102.13323.pdf), published in Applied Optics.
 
 
-<img height="500" src="/Figures/fig1.png" title="Illustration of KD training." width="500"/>
+<img height="453" src="/Figures/fig1.png" title="Illustration of KD training." width="500"/>
 
 Figure 1: Nonlinear CNN (top) and SCLC (botom).
 
