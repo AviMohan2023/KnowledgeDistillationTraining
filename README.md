@@ -53,11 +53,15 @@ Face Recognition
 ## Citation
 Please cite the Knowledge Distillation Circumvents Nonlinearity for Optical Convolutional Neural Networks when you use this code.
 
-`@book{xiang2021knowledge,
-  title={Knowledge Distillation Circumvents Nonlinearity for Optical Convolutional Neural Networks},
-  author={Xiang, Jinlin},
-  year={2021},
-  publisher={University of Washington}
+`@article{xiang2022knowledge,
+  title={Knowledge distillation circumvents nonlinearity for optical convolutional neural networks},
+  author={Xiang, Jinlin and Colburn, Shane and Majumdar, Arka and Shlizerman, Eli},
+  journal={Applied Optics},
+  volume={61},
+  number={9},
+  pages={2173--2183},
+  year={2022},
+  publisher={Optica Publishing Group}
 }
 `
 
