@@ -226,33 +226,39 @@ def reproducibilitySeed(use_gpu=True):
         torch.backends.cudnn.benchmark = False
 
 if __name__ == '__main__':
+    # preparation
     train_loader, test_loader = dataload('MNIST', bs=10)
-    # teacher_model = Teacher_Network(in_channels=1).cuda()
+    teacher_model = Teacher_Network(in_channels=1).cuda()
     student_model = StudentNetwork_noRelu(in_channels=1).cuda()
-
     model_path = 'models/'
     teacher_model_name ='teacher.pth'
     student_model_name = 'student.pth'
 
+
+    # step 1: train teacher:
+    criterion = nn.NLLLoss()
+    optimizer = optim.SGD(teacher_model.parameters(), lr=0.003)
+    epochs = 50
+    lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.95)
+
+    solver = teacher_solver(train_loader, test_loader, teacher_model, criterion, optimizer,
+                 lr_scheduler,
+                 epochs, model_path, teacher_model_name)
+    solver.train()
+
+    #step 2: load teacher model:
+
+    teacher_model.load_state_dict(torch.load(model_path+teacher_model_name))
+    print("init weight from {}".format(model_path))
+    print(sum([param.nelement() * param.element_size() for param in teacher_model.parameters()]))
+
+    # step 3: training student model
     criterion = nn.NLLLoss()
     optimizer = optim.SGD(student_model.parameters(), lr=0.003)
     epochs = 50
     lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.95)
 
-    # solver = teacher_solver(train_loader, test_loader, teacher_model, criterion, optimizer,
-    #              lr_scheduler,
-    #              epochs, model_path, teacher_model_name)
-
-
-
-    # # load the model
-    # teacher_model.load_state_dict(torch.load(model_path+teacher_model_name))
-    # print("init weight from {}".format(model_path))
-    # print(sum([param.nelement() * param.element_size() for param in teacher_model.parameters()]))
-
-
-
-    solver = teacher_solver(train_loader, test_loader, student_model, criterion, optimizer,
+    solver = student_solver(train_loader, test_loader, student_model, teacher_model, criterion, optimizer,
                                           lr_scheduler,
                                           epochs, model_path, student_model_name)
     solver.train()
