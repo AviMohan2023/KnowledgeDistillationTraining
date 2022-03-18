@@ -57,9 +57,8 @@ class FFT_Conv_Layer(nn.Module):
         imgsIm = imgs[:, :, :, :, :, 1]
 
         # Pad and transform the filters
-        print(self.filts)
+
         filts = F.pad(self.filts, (0, 0, 0, self.imgSize - 1, 0, self.imgSize - 1))
-        print(filts)
 
         filts = torch.fft(filts, 2)
 
@@ -194,3 +193,10 @@ class StudentNetwork_noRelu(nn.Module):
         forw = F.relu(forw)
         forw = self.fc3(forw)
         return self.m(forw)
+if __name__ == '__main__':
+
+    # test student
+    torch.cuda.set_device(1)
+    test_net = StudentNetwork_noRelu().cuda()
+    x = torch.zeros([8, 3, 28, 28]).cuda()
+    test_net(x)

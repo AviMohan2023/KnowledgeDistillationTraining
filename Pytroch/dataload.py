@@ -9,7 +9,7 @@ from torchvision import datasets, transforms, models
 from tqdm import tqdm
 from network_MNIST import *
 
-def dataload(key):
+def dataload(key, bs):
     '''data agumentaiton'''
 
     if key == 'HIGH10':
@@ -45,11 +45,11 @@ def dataload(key):
         test_dataset = datasets.MNIST(root='../data', train=False,
                                       transform=transform)
 
-    trainloader = torch.utils.data.DataLoader(train_dataset,batch_size=16, shuffle=True)
-    testloader = torch.utils.data.DataLoader(test_dataset,batch_size=16, shuffle=True)
+    trainloader = torch.utils.data.DataLoader(train_dataset,batch_size=bs, shuffle=True)
+    testloader = torch.utils.data.DataLoader(test_dataset,batch_size=bs, shuffle=True)
 
     return trainloader, testloader
 
 if __name__ == '__main__':
-    trainloader, testloader = dataload('HIGH10')
+    trainloader, testloader = dataload('HIGH10',bs=16)
     print('Train batch:', len(trainloader) ,',Test batch:', len(testloader))
