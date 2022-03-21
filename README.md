@@ -20,10 +20,9 @@ In recent years, Convolutional Neural Networks (CNNs) have enabled ubiquitous im
 Our training example are showed in jupyter notebook.
 
 ## Requirements
+pyTorch 1.4
 
-Tensorflow 1.14.0
-
-Python 3
+Python 3.8
 
 scikit-learn 0.21.2
 
