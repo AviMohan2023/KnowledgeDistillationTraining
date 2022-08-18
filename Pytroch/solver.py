@@ -146,9 +146,16 @@ class student_solver():
             # load the model
             if val_loss is None or val_stu_avg_loss < val_loss:
                 val_loss = val_stu_avg_loss
+                print(self.model_name)
                 torch.save(self.model.state_dict(), self.model_path + self.model_name)
                 best_model = epoch
             print('best_model is on epoch:', best_model)
+            if val_loss < 1e-4:
+                val_loss = val_stu_avg_loss
+                torch.save(self.model.state_dict(), self.model_path + self.model_name)
+                best_model = epoch
+            print('best_model is on epoch:', best_model)
+
 
     def train_loop(self):
         # print_every = 1000
@@ -194,7 +201,7 @@ class student_solver():
                     loss += criterion(pred, y) * y.shape[0]
                 accuracy += torch.sum(torch.argmax(pred, dim=1) == y).item()
             dataset_size += y.shape[0]
-        loss, accuracy = loss / dataset_size, accuracy / dataset_size
+        loss, accuracy = loss, accuracy / dataset_size
         network.is_training = True
         return loss, accuracy
 
@@ -227,26 +234,20 @@ def reproducibilitySeed(use_gpu=True):
         torch.backends.cudnn.benchmark = False
 
 if __name__ == '__main__':
+
     # preparation
     train_loader, test_loader = dataload('MNIST', bs=10)
     teacher_model = Teacher_Network(in_channels=1).cuda()
-    student_model = StudentNetwork_noRelu(in_channels=1).cuda()
-    model_path = '../models/'
+    student_model = Student_Network_one_conv(in_channels=1).cuda()
+    model_path = 'models/'
     teacher_model_name ='teacher.pth'
-    student_model_name = 'student.pth'
+    student_model_name = 'student_model_new.pth'
 
     # for test:
 
-    torch.cuda.set_device(1)
-    train_loader, test_loader = dataload('MNIST', bs=10)
-    teacher_model = Teacher_Network(in_channels=1).cuda()
-    student_model = StudentNetwork_noRelu(in_channels=1).cuda()
-    model_path = 'models/'
-    teacher_model_name = 'teacher.pth'
-    student_model_name = 'student.pth'
-
     student_model.load_state_dict(torch.load(model_path + student_model_name))
     print("init weight from {}".format(model_path))
+    print(student_model)
     print(sum([param.nelement() * param.element_size() for param in student_model.parameters()]))
 
     solver = student_solver(train_loader, test_loader, student_model, teacher_model, None, None,
@@ -256,18 +257,22 @@ if __name__ == '__main__':
     print('Validate | Loss {0:.4f}'.format(loss))
     print('Validate | Accuracy {0:.4f}'.format(val_acc))
 
-    # for trainining:
-    # # step 1: train teacher:
-    # criterion = nn.NLLLoss()
-    # optimizer = optim.SGD(teacher_model.parameters(), lr=0.003)
-    # epochs = 50
-    # lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.95)
-    #
-    # solver = teacher_solver(train_loader, test_loader, teacher_model, criterion, optimizer,
-    #              lr_scheduler,
-    #              epochs, model_path, teacher_model_name)
+    print(student_model.state_dict()['conv1.weight'].shape)
+    kernel = student_model.state_dict()['conv1.weight'].cpu().numpy()
+    np.save('kernel.npy', kernel)
 
-    # #step 2: load teacher model:
+    # # for trainining:
+    # # # step 1: train teacher:
+    # # criterion = nn.NLLLoss()
+    # # optimizer = optim.SGD(teacher_model.parameters(), lr=0.003)
+    # # epochs = 50
+    # # lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.95)
+    # #
+    # # solver = teacher_solver(train_loader, test_loader, teacher_model, criterion, optimizer,
+    # #              lr_scheduler,
+    # #              epochs, model_path, teacher_model_name)
+    #
+    # step 2: load teacher model:
     #
     # teacher_model.load_state_dict(torch.load(model_path+teacher_model_name))
     # print("init weight from {}".format(model_path))
@@ -279,10 +284,10 @@ if __name__ == '__main__':
     #
     # criterion = nn.NLLLoss()
     # optimizer = optim.SGD(student_model.parameters(), lr=0.003)
-    # epochs = 50
+    # epochs = 30
     # lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.95)
     #
     # solver = student_solver(train_loader, test_loader, student_model, teacher_model, criterion, optimizer,
     #                                       lr_scheduler,
-    #                                       epochs, model_path, 'model_new.pth')
+    #                                       epochs, model_path, student_model_name)
     # solver.train()
